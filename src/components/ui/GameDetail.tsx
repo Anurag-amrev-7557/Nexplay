@@ -45,21 +45,6 @@ export default function GameDetail({ game, onBack }: GameDetailProps) {
     ? game.tags 
     : ["Base Game", "Character Customization", "Great Boss Battles"];
 
-  // Download Action Logic
-  const handleDownload = () => {
-    if (game.downloadLink && game.downloadLink.length > 0) {
-      // Find the first valid URL
-      const link = game.downloadLink.find(l => l && l.startsWith('http'));
-      if (link) {
-        window.open(link, '_blank');
-      } else {
-        alert("Download links not available directly for this entry yet.");
-      }
-    } else {
-      alert("No direct download link attached for this game.");
-    }
-  };
-
   return (
     <div className="flex flex-col w-full text-white min-h-screen">
       {/* Top Header & Navigation */}

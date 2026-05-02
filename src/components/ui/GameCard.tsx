@@ -5,7 +5,7 @@ export interface GameCardProps {
   subtitle?: string;
 }
 
-export default function GameCard({ title, price, image, subtitle = "Base Game" }: GameCardProps) {
+export default function GameCard({ title, image, subtitle = "Base Game" }: GameCardProps) {
   return (
     <div className="group cursor-pointer flex flex-col">
       <div className="aspect-video rounded-md bg-epic-gray overflow-hidden relative mb-3">
