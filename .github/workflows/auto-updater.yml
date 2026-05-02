@@ -1,0 +1,54 @@
+name: Auto Scraper & Deploy
+
+on:
+  # Run automatically every 12 hours
+  schedule:
+    - cron: '0 */12 * * *'
+  
+  # Allow running manually from the GitHub Actions tab
+  workflow_dispatch:
+
+jobs:
+  scrape-and-update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          # Ensure we checkout the branch so we can commit back to it
+          ref: ${{ github.head_ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Dependencies
+        # We need puppeteer and stealth plugin to run the scrapers
+        run: npm ci
+
+      - name: Install Chromium (for Puppeteer)
+        run: npx puppeteer browsers install chrome
+
+      - name: Run Scrapers
+        # Run all three of your scraper scripts sequentially
+        run: |
+          node scripts/crawler_toxic.js
+          node scripts/scrape_anker_load_more.js
+          node scripts/scrape_anker_details.js
+        env:
+          # Required for puppeteer to run without sandbox in CI environments
+          PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: "true"
+
+      - name: Commit and Push Updated Data
+        # If the scrapers found new games, commit the updated JSONs to the repository
+        # This commit will automatically trigger Cloudflare Pages to rebuild your site!
+        run: |
+          git config --global user.name "Nexplay Bot"
+          git config --global user.email "bot@nexplay.com"
+          git add src/data/*.json
+          # Only commit if there are changes
+          git diff --quiet && git diff --staged --quiet || (git commit -m "chore: auto-update game catalog database" && git push)
